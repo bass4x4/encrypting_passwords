@@ -6,7 +6,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.HashMap;
 
 public class App {
     public static void main(String[] args) {
@@ -19,8 +18,7 @@ public class App {
         PasswordUtils.initPasswords();
         authWindow.addWindowListener(new WindowAdapter() {
             @Override
-            public void windowClosing(WindowEvent e)
-            {
+            public void windowClosing(WindowEvent e) {
                 PasswordUtils.savePasswordsToFile();
                 e.getWindow().dispose();
             }
