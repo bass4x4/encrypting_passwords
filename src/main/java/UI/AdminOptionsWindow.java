@@ -13,7 +13,7 @@ public class AdminOptionsWindow {
 
     AdminOptionsWindow() {
         changePasswordButton.addActionListener(actionEvent -> {
-            PasswordUtils.setAdminsNewPassword(false);
+            PasswordUtils.setUsersNewPassword(PasswordUtils.ADMIN_NAME);;
         });
 
         addUserButton.addActionListener(actionEvent -> {

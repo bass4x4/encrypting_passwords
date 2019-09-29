@@ -1,5 +1,8 @@
 package Backend;
 
+import com.sun.org.slf4j.internal.Logger;
+import com.sun.org.slf4j.internal.LoggerFactory;
+
 import javax.swing.*;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -10,11 +13,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 public class PasswordUtils {
-    public final static HashMap<String, UserContext> PASSWORDS = new HashMap<>();
+    private static final Logger logger = LoggerFactory.getLogger(PasswordUtils.class);
 
-    private final static String PASSWORDS_FILE = "\\PASSWORDS.txt";
+    protected static final Map<String, UserContext> PASSWORDS = new HashMap<>();
 
-    public final static String ADMIN_NAME = "admin";
+    private static final String PASSWORDS_FILE = "\\PASSWORDS.txt";
+
+    public static final String ADMIN_NAME = "admin";
 
     public static UserContext currentUser = null;
 
@@ -25,7 +30,7 @@ public class PasswordUtils {
             UserContext adminContext = new UserContext(ADMIN_NAME, "", false, true, 8);
             PASSWORDS.put(ADMIN_NAME, adminContext);
             savePasswordsToFile();
-            setAdminsNewPassword(true);
+            setUsersPassword(ADMIN_NAME);
         }
     }
 
@@ -54,15 +59,6 @@ public class PasswordUtils {
         String[] split = contextString.split(",");
         UserContext userContext = new UserContext(split[0], split[1], split[2].equals("1"), split[3].equals("1"), Integer.parseInt(split[4]));
         PASSWORDS.put(split[0], userContext);
-    }
-
-    public static void setAdminsNewPassword(boolean firstLogin) {
-        if (firstLogin) {
-            setUsersPassword(ADMIN_NAME);
-        } else {
-            setUsersNewPassword(ADMIN_NAME);
-        }
-
     }
 
     public static void setUsersNewPassword(String userName) {
@@ -131,19 +127,19 @@ public class PasswordUtils {
                 try {
                     fileOutputStream.write(getFormattedContext(userContext).getBytes());
                 } catch (IOException e) {
-                    System.out.println("Could't write context to file");
+                    logger.error("Could't write context to file");
                 }
             });
             fileOutputStream.close();
         } catch (IOException e) {
-            System.out.println("Error writing to file");
+            logger.error("Error writing to file");
         }
     }
 
     private static String getFormattedContext(UserContext userContext) {
         int isBlocked = userContext.isBlocked() ? 1 : 0;
         int isLimited = userContext.isPasswordLimited() ? 1 : 0;
-        return String.format("%s,%s,%d,%d,%d\n", userContext.getUserName(), userContext.getPassword(), isBlocked, isLimited, userContext.getMinimumPasswordLength());
+        return String.format("%s,%s,%d,%d,%d%n", userContext.getUserName(), userContext.getPassword(), isBlocked, isLimited, userContext.getMinimumPasswordLength());
     }
 
     private static String showInputDialog(String message) {
@@ -229,7 +225,7 @@ public class PasswordUtils {
         }
     }
 
-    public static String getDecryptedPassword(String userName) {
+    private static String getDecryptedPassword(String userName) {
         String encryptedPassword = PasswordUtils.PASSWORDS.get(userName).getPassword();
         int[] key = getKey(userName, encryptedPassword);
         char[] decryptedPassword = new char[encryptedPassword.length()];
