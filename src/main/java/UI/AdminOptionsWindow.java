@@ -12,13 +12,9 @@ public class AdminOptionsWindow {
     private JButton addUserButton;
 
     AdminOptionsWindow() {
-        changePasswordButton.addActionListener(actionEvent -> {
-            PasswordUtils.setUsersNewPassword(PasswordUtils.ADMIN_NAME);;
-        });
+        changePasswordButton.addActionListener(actionEvent -> PasswordUtils.setUsersNewPassword(PasswordUtils.ADMIN_NAME));
 
-        addUserButton.addActionListener(actionEvent -> {
-            createPanelOfType(new AddUserWindow().getAddUserPanel(), 200, 200);
-        });
+        addUserButton.addActionListener(actionEvent -> createPanelOfType(new AddUserWindow().getAddUserPanel(), 200, 200));
         listUsersButton.addActionListener(actionEvent -> {
             ListUsersWindow listUsersWindow = new ListUsersWindow();
             listUsersWindow.setUp();

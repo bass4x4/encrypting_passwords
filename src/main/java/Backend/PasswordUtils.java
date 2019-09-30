@@ -1,13 +1,21 @@
 package Backend;
 
-import com.sun.org.slf4j.internal.Logger;
-import com.sun.org.slf4j.internal.LoggerFactory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.crypto.*;
+import javax.crypto.spec.SecretKeySpec;
 import javax.swing.*;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
@@ -15,50 +23,89 @@ import java.util.stream.Stream;
 public class PasswordUtils {
     private static final Logger logger = LoggerFactory.getLogger(PasswordUtils.class);
 
-    protected static final Map<String, UserContext> PASSWORDS = new HashMap<>();
-
-    private static final String PASSWORDS_FILE = "\\PASSWORDS.txt";
+    public static final Map<String, UserContext> PASSWORDS = new HashMap<>();
 
     public static final String ADMIN_NAME = "admin";
 
     public static UserContext currentUser = null;
 
-    private static String path = System.getProperty("user.dir") + PASSWORDS_FILE;
+    private static String pathString = System.getProperty("user.dir") + "\\PASSWORDS.txt";
 
     static void initPasswords() {
-        if (initPasswordsFromFile()) {
+        String passPhrase = showInputDialog("Enter passphrase:");
+
+        try {
+            if (checkHashedPassPhraseAndInitPasswords(passPhrase)) {
+
+            }
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException e) {
+            JOptionPane.showMessageDialog(null, e.getMessage());
+            System.exit(1);
+        } catch (BadPaddingException e) {
+            JOptionPane.showMessageDialog(null, "Wrong passphrase!");
+            System.exit(1);
+        }
+        /*if (initPasswordsFromFile()) {
             UserContext adminContext = new UserContext(ADMIN_NAME, "", false, true, 8);
             PASSWORDS.put(ADMIN_NAME, adminContext);
             savePasswordsToFile();
             setUsersPassword(ADMIN_NAME);
-        }
+        }*/
     }
 
-    private static boolean initPasswordsFromFile() {
+    private static boolean checkHashedPassPhraseAndInitPasswords(String passPhrase) throws NoSuchAlgorithmException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException {
+        MessageDigest mdHashFunction = MessageDigest.getInstance("MD2");
+        byte[] hashedPassPhrase = mdHashFunction.digest(passPhrase.getBytes());
+
+        SecretKey hashedPassPhraseKey = new SecretKeySpec(hashedPassPhrase, 0, 16, "AES");
+
+        Cipher cipherDecrypt = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        cipherDecrypt.init(Cipher.DECRYPT_MODE, hashedPassPhraseKey);
+
         try {
-            Optional<String> first = Files.lines(Paths.get(path)).findFirst();
-            if (first.isPresent()) {
-                if (first.get().equals("admin,,0,1,8")) {
-                    return true;
-                } else {
-                    parsePasswordsFromFile(Files.lines(Paths.get(path)));
-                    return false;
-                }
+            Path passwordsPath = Paths.get(pathString);
+            byte[] encryptedByteArray = Files.readAllBytes(passwordsPath);
+            String decryptedString = new String(cipherDecrypt.doFinal(encryptedByteArray));
+            String[] decryptedLines = decryptedString.split("\\r?\\n");
+            if (!parsePasswordsFromFile(decryptedLines)) {
+                return false;
+            } else {
+                return PASSWORDS.containsKey(ADMIN_NAME);
             }
-        } catch(IOException io) {
-            JOptionPane.showMessageDialog(null, "Error reading file with passwords!");
+        } catch (InvalidPathException e) {
+            JOptionPane.showMessageDialog(null, "File with passwords doesn't exist!");
+            return false;
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "Error reading from file!");
+            return false;
         }
+    }
+
+    private static boolean parsePasswordsFromFile(String[] contextLines) {
+        Stream<String> contextsStream = Stream.of(contextLines);
+        return contextsStream.allMatch(PasswordUtils::parseContextFromLine);
+    }
+
+    private static boolean parseContextFromLine(String contextString) {
+        String[] dividedContext = contextString.split(",");
+        if (dividedContext.length != 5) {
+            JOptionPane.showMessageDialog(null, "Check passphrase!");
+            return false;
+        }
+
+        String userName = dividedContext[0];
+        String isBlocked = dividedContext[2];
+        String passwordAllowed = dividedContext[3];
+        String minimumPasswordLength = dividedContext[4];
+
+        if (userName.isEmpty() || isBlocked.isEmpty() || passwordAllowed.isEmpty() || minimumPasswordLength.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Check passphrase!");
+            return false;
+        }
+
+        UserContext userContext = new UserContext(userName, dividedContext[1], isBlocked.equals("1"), passwordAllowed.equals("1"), Integer.parseInt(minimumPasswordLength));
+        PASSWORDS.put(userName, userContext);
         return true;
-    }
-
-    private static void parsePasswordsFromFile(Stream<String> lines) {
-        lines.forEach(PasswordUtils::parseContextFromLine);
-    }
-
-    private static void parseContextFromLine(String contextString) {
-        String[] split = contextString.split(",");
-        UserContext userContext = new UserContext(split[0], split[1], split[2].equals("1"), split[3].equals("1"), Integer.parseInt(split[4]));
-        PASSWORDS.put(split[0], userContext);
     }
 
     public static void setUsersNewPassword(String userName) {
@@ -122,7 +169,7 @@ public class PasswordUtils {
 
     static void savePasswordsToFile() {
         try {
-            FileOutputStream fileOutputStream = new FileOutputStream(path, false);
+            FileOutputStream fileOutputStream = new FileOutputStream(pathString, false);
             PASSWORDS.values().forEach(userContext -> {
                 try {
                     fileOutputStream.write(getFormattedContext(userContext).getBytes());
