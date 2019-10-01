@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 import javax.swing.*;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -27,6 +28,8 @@ public class PasswordUtils {
 
     public static final String ADMIN_NAME = "admin";
 
+    private static SecretKey hashedPassPhraseKey;
+
     public static UserContext currentUser = null;
 
     private static String pathString = System.getProperty("user.dir") + "\\PASSWORDS.txt";
@@ -35,8 +38,8 @@ public class PasswordUtils {
         String passPhrase = showInputDialog("Enter passphrase:");
 
         try {
-            if (checkHashedPassPhraseAndInitPasswords(passPhrase)) {
-
+            if (!checkHashedPassPhraseAndInitPasswords(passPhrase)) {
+                System.exit(1);
             }
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException e) {
             JOptionPane.showMessageDialog(null, e.getMessage());
@@ -44,44 +47,58 @@ public class PasswordUtils {
         } catch (BadPaddingException e) {
             JOptionPane.showMessageDialog(null, "Wrong passphrase!");
             System.exit(1);
+        } catch (InvalidPathException e) {
+            JOptionPane.showMessageDialog(null, "File with passwords doesn't exist!");
+            System.exit(1);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "Error reading from file!");
+            System.exit(1);
         }
-        /*if (initPasswordsFromFile()) {
-            UserContext adminContext = new UserContext(ADMIN_NAME, "", false, true, 8);
-            PASSWORDS.put(ADMIN_NAME, adminContext);
-            savePasswordsToFile();
-            setUsersPassword(ADMIN_NAME);
-        }*/
     }
 
-    private static boolean checkHashedPassPhraseAndInitPasswords(String passPhrase) throws NoSuchAlgorithmException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException {
+    private static boolean checkHashedPassPhraseAndInitPasswords(String passPhrase) throws NoSuchAlgorithmException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException, IOException {
         MessageDigest mdHashFunction = MessageDigest.getInstance("MD2");
         byte[] hashedPassPhrase = mdHashFunction.digest(passPhrase.getBytes());
 
-        SecretKey hashedPassPhraseKey = new SecretKeySpec(hashedPassPhrase, 0, 16, "AES");
+        hashedPassPhraseKey = new SecretKeySpec(hashedPassPhrase, 0, 16, "AES");
 
         Cipher cipherDecrypt = Cipher.getInstance("AES/ECB/PKCS5Padding");
         cipherDecrypt.init(Cipher.DECRYPT_MODE, hashedPassPhraseKey);
 
-        try {
-            Path passwordsPath = Paths.get(pathString);
-            byte[] encryptedByteArray = Files.readAllBytes(passwordsPath);
-            String decryptedString = new String(cipherDecrypt.doFinal(encryptedByteArray));
-            String[] decryptedLines = decryptedString.split("\\r?\\n");
-            if (!parsePasswordsFromFile(decryptedLines)) {
+        Path passwordsPath = Paths.get(pathString);
+        byte[] encryptedByteArray = Files.readAllBytes(passwordsPath);
+        String decryptedString = new String(cipherDecrypt.doFinal(encryptedByteArray));
+        String[] decryptedLines = decryptedString.split("\\r?\\n");
+        if (!contextsHaveRightFormatParseThem(decryptedLines)) {
+            return false;
+        } else {
+            if (adminExists()) {
+                if (adminHasPassword()) {
+                    return true;
+                } else if (firstStart()) {
+                    setUsersPassword(ADMIN_NAME);
+                    return true;
+                }
                 return false;
             } else {
-                return PASSWORDS.containsKey(ADMIN_NAME);
+                return false;
             }
-        } catch (InvalidPathException e) {
-            JOptionPane.showMessageDialog(null, "File with passwords doesn't exist!");
-            return false;
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, "Error reading from file!");
-            return false;
         }
     }
 
-    private static boolean parsePasswordsFromFile(String[] contextLines) {
+    private static boolean adminExists() {
+        return PASSWORDS.containsKey(ADMIN_NAME);
+    }
+
+    private static boolean adminHasPassword() {
+        return !PASSWORDS.get(ADMIN_NAME).getPassword().isEmpty();
+    }
+
+    private static boolean firstStart() {
+        return PASSWORDS.get(ADMIN_NAME).getPassword().isEmpty() && PASSWORDS.size() == 1;
+    }
+
+    private static boolean contextsHaveRightFormatParseThem(String[] contextLines) {
         Stream<String> contextsStream = Stream.of(contextLines);
         return contextsStream.allMatch(PasswordUtils::parseContextFromLine);
     }
@@ -90,7 +107,7 @@ public class PasswordUtils {
         String[] dividedContext = contextString.split(",");
         if (dividedContext.length != 5) {
             JOptionPane.showMessageDialog(null, "Check passphrase!");
-            return false;
+            System.exit(1);
         }
 
         String userName = dividedContext[0];
@@ -100,7 +117,7 @@ public class PasswordUtils {
 
         if (userName.isEmpty() || isBlocked.isEmpty() || passwordAllowed.isEmpty() || minimumPasswordLength.isEmpty()) {
             JOptionPane.showMessageDialog(null, "Check passphrase!");
-            return false;
+            System.exit(1);
         }
 
         UserContext userContext = new UserContext(userName, dividedContext[1], isBlocked.equals("1"), passwordAllowed.equals("1"), Integer.parseInt(minimumPasswordLength));
@@ -169,17 +186,27 @@ public class PasswordUtils {
 
     static void savePasswordsToFile() {
         try {
+            Cipher cipherEncrypt = Cipher.getInstance("AES/ECB/PKCS5Padding");
+            cipherEncrypt.init(Cipher.ENCRYPT_MODE, hashedPassPhraseKey);
+
             FileOutputStream fileOutputStream = new FileOutputStream(pathString, false);
             PASSWORDS.values().forEach(userContext -> {
                 try {
-                    fileOutputStream.write(getFormattedContext(userContext).getBytes());
+                    byte[] formattedEncryptedContext = cipherEncrypt.doFinal(getFormattedContext(userContext).getBytes("UTF8"));
+                    fileOutputStream.write(formattedEncryptedContext);
                 } catch (IOException e) {
-                    logger.error("Could't write context to file");
+                    JOptionPane.showMessageDialog(null, "Could't write context to file");
+                } catch (BadPaddingException | IllegalBlockSizeException e) {
+                    JOptionPane.showMessageDialog(null, e.getMessage());
                 }
             });
             fileOutputStream.close();
+        } catch (FileNotFoundException e) {
+            JOptionPane.showMessageDialog(null, "File with passwords not found");
         } catch (IOException e) {
-            logger.error("Error writing to file");
+            JOptionPane.showMessageDialog(null, "Error writing to file");
+        } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException e) {
+            JOptionPane.showMessageDialog(null, e.getMessage());
         }
     }
 
