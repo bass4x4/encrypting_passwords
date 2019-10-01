@@ -104,6 +104,7 @@ public class PasswordUtils {
     }
 
     private static boolean parseContextFromLine(String contextString) {
+        contextString = contextString.replaceAll("[^a-zA-Z0-9,]", "");
         String[] dividedContext = contextString.split(",");
         if (dividedContext.length != 5) {
             JOptionPane.showMessageDialog(null, "Check passphrase!");
@@ -192,7 +193,8 @@ public class PasswordUtils {
             FileOutputStream fileOutputStream = new FileOutputStream(pathString, false);
             PASSWORDS.values().forEach(userContext -> {
                 try {
-                    byte[] formattedEncryptedContext = cipherEncrypt.doFinal(getFormattedContext(userContext).getBytes("UTF8"));
+                    byte[] utf8s = getFormattedContext(userContext).getBytes("UTF8");
+                    byte[] formattedEncryptedContext = cipherEncrypt.doFinal(utf8s);
                     fileOutputStream.write(formattedEncryptedContext);
                 } catch (IOException e) {
                     JOptionPane.showMessageDialog(null, "Could't write context to file");
@@ -213,7 +215,7 @@ public class PasswordUtils {
     private static String getFormattedContext(UserContext userContext) {
         int isBlocked = userContext.isBlocked() ? 1 : 0;
         int isLimited = userContext.isPasswordLimited() ? 1 : 0;
-        return String.format("%s,%s,%d,%d,%d%n", userContext.getUserName(), userContext.getPassword(), isBlocked, isLimited, userContext.getMinimumPasswordLength());
+        return String.format("%s,%s,%d,%d,%d\n", userContext.getUserName(), userContext.getPassword(), isBlocked, isLimited, userContext.getMinimumPasswordLength());
     }
 
     private static String showInputDialog(String message) {
