@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 import javax.swing.*;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -58,13 +59,14 @@ public class PasswordUtils {
 
     private static boolean checkHashedPassPhraseAndInitPasswords(String passPhrase) throws NoSuchAlgorithmException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException, IOException {
         MessageDigest mdHashFunction = MessageDigest.getInstance("MD2");
+        passPhrase += "SALTsaltSALTsaltSALTsaltSALTsalt";
         byte[] hashedPassPhrase = mdHashFunction.digest(passPhrase.getBytes());
-
         hashedPassPhraseKey = new SecretKeySpec(hashedPassPhrase, 0, 16, "AES");
+
+        createFileIfNotExists();
 
         Cipher cipherDecrypt = Cipher.getInstance("AES/ECB/PKCS5Padding");
         cipherDecrypt.init(Cipher.DECRYPT_MODE, hashedPassPhraseKey);
-
         Path passwordsPath = Paths.get(pathString);
         byte[] encryptedByteArray = Files.readAllBytes(passwordsPath);
         String decryptedString = new String(cipherDecrypt.doFinal(encryptedByteArray));
@@ -86,6 +88,21 @@ public class PasswordUtils {
         }
     }
 
+    private static void createFileIfNotExists() throws IOException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+        File fileWithPasswords = new File(pathString);
+        if (!fileWithPasswords.exists()) {
+            fileWithPasswords.createNewFile();
+            Cipher cipherEncrypt = Cipher.getInstance("AES/ECB/PKCS5Padding");
+            cipherEncrypt.init(Cipher.ENCRYPT_MODE, hashedPassPhraseKey);
+
+            byte[] utf8s = cipherEncrypt.doFinal("admin,,0,1,8".getBytes("UTF8"));
+            FileOutputStream fileOutputStream = new FileOutputStream(fileWithPasswords);
+            fileOutputStream.write(utf8s);
+            fileOutputStream.flush();
+            fileOutputStream.close();
+        }
+    }
+
     private static boolean adminExists() {
         return PASSWORDS.containsKey(ADMIN_NAME);
     }
@@ -104,7 +121,7 @@ public class PasswordUtils {
     }
 
     private static boolean parseContextFromLine(String contextString) {
-        contextString = contextString.replaceAll("[^a-zA-Z0-9,]", "");
+        contextString = contextString.replaceAll("[^a-zA-Z0-9,;!@#$%^&*()-=+/|.<>`~ ]", "");
         String[] dividedContext = contextString.split(",");
         if (dividedContext.length != 5) {
             JOptionPane.showMessageDialog(null, "Check passphrase!");
