@@ -4,22 +4,27 @@ import Backend.PasswordUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class AdminOptionsWindow {
     private JPanel adminOptionsPanel;
     private JButton changePasswordButton;
     private JButton listUsersButton;
     private JButton addUserButton;
+    private JButton cypherButton;
+    private JButton passphraseSettingsButton;
 
     AdminOptionsWindow() {
         changePasswordButton.addActionListener(actionEvent -> PasswordUtils.setUsersNewPassword(PasswordUtils.ADMIN_NAME));
-
         addUserButton.addActionListener(actionEvent -> createPanelOfType(new AddUserWindow().getAddUserPanel(), 200, 200));
         listUsersButton.addActionListener(actionEvent -> {
             ListUsersWindow listUsersWindow = new ListUsersWindow();
             listUsersWindow.setUp();
-            createPanelOfType(listUsersWindow.getListUsersPanel(), 500, 250);
+            createPanelOfType(listUsersWindow.getListUsersPanel(), 500, 350);
         });
+        cypherButton.addActionListener(actionEvent -> createPanelOfType(new CypherWindow().getCypherPanel(), 600, 350));
+        passphraseSettingsButton.addActionListener(actionEvent -> createPanelOfType(new PassphraseWindow().getPassphrasePanel(), 300, 300));
     }
 
     private void createPanelOfType(JPanel adminOptionsPanel, int x, int y) {
@@ -32,7 +37,7 @@ public class AdminOptionsWindow {
         optionWindow.setVisible(true);
     }
 
-    public JPanel getAdminOptionsPanel() {
+    JPanel getAdminOptionsPanel() {
         return adminOptionsPanel;
     }
 }

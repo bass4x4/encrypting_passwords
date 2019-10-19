@@ -2,6 +2,7 @@ package UI;
 
 
 import Backend.PasswordUtils;
+import com.google.common.base.Joiner;
 
 import javax.swing.*;
 import java.awt.*;
@@ -53,7 +54,7 @@ public class AuthWindow {
 
                             adminOptionsWindow.setContentPane(new AdminOptionsWindow().getAdminOptionsPanel());
                             adminOptionsWindow.pack();
-                            adminOptionsWindow.setSize(200, 200);
+                            adminOptionsWindow.setSize(300, 300);
                             adminOptionsWindow.setMaximumSize(new Dimension(200, 200));
 
                             adminOptionsWindow.setVisible(true);

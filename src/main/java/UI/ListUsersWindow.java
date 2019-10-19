@@ -16,6 +16,9 @@ public class ListUsersWindow {
     private JList usersList;
     private JButton saveButton;
     private JLabel passwordLengthLabel;
+    private JSpinner minimumValidityPeriod;
+    private JSpinner maximumValidityPeriod;
+    private JSpinner maximumKeyLength;
     private JLabel userNameLabel;
 
     private DefaultListModel<UserContext> listModel = new DefaultListModel<>();
