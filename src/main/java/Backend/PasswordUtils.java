@@ -1,23 +1,25 @@
 package Backend;
 
 
+import com.sun.jna.platform.win32.Advapi32Util;
+import com.sun.jna.platform.win32.WinReg;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 import javax.swing.*;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.awt.*;
+import java.io.*;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.InvalidKeyException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
@@ -36,7 +38,7 @@ public class PasswordUtils {
     private static String pathString = System.getProperty("user.dir") + "\\PASSWORDS.txt";
 
     static void initPasswords() {
-        String passPhrase = showInputDialog("Enter passphrase:");
+        String passPhrase = showInputPasswordDialog("Enter passphrase:");
 
         try {
             if (!checkHashedPassPhraseAndInitPasswords(passPhrase)) {
@@ -146,7 +148,7 @@ public class PasswordUtils {
     public static void setUsersNewPassword(String userName) {
         String oldPassword = "";
         while (isBadPassword(oldPassword)) {
-            oldPassword = showInputDialog("Confirm old password");
+            oldPassword = showInputPasswordDialog("Confirm old password");
             if (oldPassword == null) {
                 return;
             }
@@ -173,7 +175,7 @@ public class PasswordUtils {
     private static String getNewConfirmedPassword(String userName) {
         String newPassword = "";
         while (isBadPassword(newPassword) || !passwordFitsRules(userName, newPassword)) {
-            newPassword = showInputDialog("Choose password");
+            newPassword = showInputPasswordDialog("Choose password");
             if (newPassword == null) {
                 return "";
             }
@@ -181,7 +183,7 @@ public class PasswordUtils {
 
         String confirmedPassword = "";
         while (isBadPassword(confirmedPassword) || !confirmedPassword.equals(newPassword)) {
-            confirmedPassword = showInputDialog("Confirm password");
+            confirmedPassword = showInputPasswordDialog("Confirm password");
             if (confirmedPassword == null) {
                 return "";
             }
@@ -235,7 +237,7 @@ public class PasswordUtils {
         return String.format("%s,%s,%d,%d,%d\n", userContext.getUserName(), userContext.getPassword(), isBlocked, isLimited, userContext.getMinimumPasswordLength());
     }
 
-    private static String showInputDialog(String message) {
+    private static String showInputPasswordDialog(String message) {
         JPasswordField passwordField = new JPasswordField();
         int okCxl = JOptionPane.showConfirmDialog(null, passwordField, message, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
@@ -348,5 +350,112 @@ public class PasswordUtils {
             int startPositionToDecryptFromZero = startPositionToDecrypt + key[i - startPositionToDecrypt];
             decryptedPassword[startPositionToDecryptFromZero] = encryptedPassword.charAt(i);
         }
+    }
+
+    private static String getInfo() {
+        String username = System.getProperty("user.name");
+        String hostname = getHostname();
+        String winDirectory = System.getenv("WINDIR");
+        String system32 = winDirectory + "\\system32";
+        int numberMouseOfButtons = MouseInfo.getNumberOfButtons();
+        double screenHeight = Toolkit.getDefaultToolkit().getScreenSize().getHeight();
+        long diskSpace = getDiskSpace();
+
+
+        return new StringBuilder().append(username)
+                .append(hostname)
+                .append(winDirectory)
+                .append(system32)
+                .append(numberMouseOfButtons)
+                .append(screenHeight)
+                .append(diskSpace)
+                .toString();
+    }
+
+    private static String getHostname() {
+        try {
+            return InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException ex) {
+            return "";
+        }
+    }
+
+    private static long getDiskSpace() {
+        File file = new File("/");
+        return file.getTotalSpace();
+    }
+
+    public static void checkLicence() {
+        String registryKey = showInputDialog("Enter registry key:");
+        if (registryKey.isEmpty()) {
+            System.exit(-1);
+        }
+
+        String userdir = System.getProperty("user.dir");
+        File publicKeyFile = new File(userdir + "\\publicKey.key");
+        if (!publicKeyFile.exists()) {
+            JOptionPane.showMessageDialog(null, "File publicKey.txt not found!");
+            System.exit(-1);
+        }
+
+        try {
+            String registryValueByKey = getRegistryValueByKey(registryKey);
+            byte[] encryptedInfo = Base64.getDecoder().decode(registryValueByKey);
+
+            String path = System.getProperty("user.dir");
+
+            FileInputStream io = new FileInputStream(new File(path + "\\publicKey.txt"));
+            byte[] bytes = io.readAllBytes();
+            io.close();
+
+            KeyFactory kf = KeyFactory.getInstance("RSA");
+            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(bytes);
+            PrivateKey privateKey = kf.generatePrivate(keySpec);
+
+            Cipher cipher = Cipher.getInstance("RSA/ECB/NoPadding");
+            cipher.init(Cipher.DECRYPT_MODE, privateKey);
+
+            byte[] decryptedInfo = cipher.doFinal(encryptedInfo);
+
+            String info = getInfo();
+            MessageDigest mdHashFunction = MessageDigest.getInstance("MD2");
+            byte[] digest = mdHashFunction.digest(info.getBytes());
+            if (!Arrays.equals(removeLeadingZeros(decryptedInfo), digest)) {
+                JOptionPane.showMessageDialog(null, "Please check your licence!");
+                System.exit(-1);
+            }
+        } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
+            JOptionPane.showMessageDialog(null, e.getMessage());
+            System.exit(-1);
+        }
+    }
+
+    private static byte[] removeLeadingZeros(byte[] arr) {
+        int zeros = 0;
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i] != 0) {
+                zeros = i;
+                break;
+            }
+        }
+
+        return Arrays.copyOfRange(arr, zeros, arr.length);
+    }
+
+    private static String getRegistryValueByKey(String registryKey) {
+        return Advapi32Util.registryGetStringValue(WinReg.HKEY_CURRENT_USER, "Software", registryKey);
+    }
+
+    private static String showInputDialog(String message) {
+        JTextField jTextField = new JTextField();
+        int okCxl = JOptionPane.showConfirmDialog(null, jTextField, message, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+        if (okCxl == JOptionPane.OK_OPTION) {
+            return jTextField.getText();
+        } else {
+            System.exit(-1);
+            return "";
+        }
+
     }
 }

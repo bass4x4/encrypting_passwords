@@ -1,1 +1,1 @@
-java -cp ./target/lab-one-ankushev-1.0-SNAPSHOT.jar;C:\Users\bass4x4\Downloads\forms_rt-7.0.3.jar;C:\Users\bass4x4\.m2\repository\log4j\log4j\1.2.17\log4j-1.2.17.jar;C:\Users\bass4x4\.m2\repository\org\slf4j\slf4j-log4j12\1.7.26\slf4j-log4j12-1.7.26.jar;C:\Users\bass4x4\.m2\repository\org\slf4j\slf4j-api\1.7.26\slf4j-api-1.7.26.jar Backend.App
+java -cp ./target/lab-one-ankushev-1.0-SNAPSHOT.jar;./libs/guava-23.0.jar;./libs/forms_rt-7.0.3.jar;./libs/log4j-1.2.17.jar;./libs/slf4j-log4j12-1.7.26.jar;./libs/slf4j-api-1.7.26.jar Backend.App

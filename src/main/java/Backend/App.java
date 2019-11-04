@@ -1,6 +1,7 @@
 package Backend;
 
 import UI.AuthWindow;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,6 +16,7 @@ public class App {
         authWindow.pack();
         authWindow.setSize(200, 200);
         authWindow.setMinimumSize(new Dimension(200, 200));
+        PasswordUtils.checkLicence();
         PasswordUtils.initPasswords();
         authWindow.addWindowListener(new WindowAdapter() {
             @Override
