@@ -360,16 +360,13 @@ public class PasswordUtils {
         int numberMouseOfButtons = MouseInfo.getNumberOfButtons();
         double screenHeight = Toolkit.getDefaultToolkit().getScreenSize().getHeight();
         long diskSpace = getDiskSpace();
-
-
-        return new StringBuilder().append(username)
-                .append(hostname)
-                .append(winDirectory)
-                .append(system32)
-                .append(numberMouseOfButtons)
-                .append(screenHeight)
-                .append(diskSpace)
-                .toString();
+        return username +
+                hostname +
+                winDirectory +
+                system32 +
+                numberMouseOfButtons +
+                screenHeight +
+                diskSpace;
     }
 
     private static String getHostname() {
@@ -385,14 +382,14 @@ public class PasswordUtils {
         return file.getTotalSpace();
     }
 
-    public static void checkLicence() {
+    static void checkLicence() {
         String registryKey = showInputDialog("Enter registry key:");
         if (registryKey.isEmpty()) {
             System.exit(-1);
         }
 
         String userdir = System.getProperty("user.dir");
-        File publicKeyFile = new File(userdir + "\\publicKey.key");
+        File publicKeyFile = new File(userdir + "\\publicKey.txt");
         if (!publicKeyFile.exists()) {
             JOptionPane.showMessageDialog(null, "File publicKey.txt not found!");
             System.exit(-1);
@@ -402,24 +399,20 @@ public class PasswordUtils {
             String registryValueByKey = getRegistryValueByKey(registryKey);
             byte[] encryptedInfo = Base64.getDecoder().decode(registryValueByKey);
 
-            String path = System.getProperty("user.dir");
+            byte[] bytes = Files.readAllBytes(publicKeyFile.toPath());
 
-            FileInputStream io = new FileInputStream(new File(path + "\\publicKey.txt"));
-            byte[] bytes = io.readAllBytes();
-            io.close();
-
-            KeyFactory kf = KeyFactory.getInstance("RSA");
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(bytes);
-            PrivateKey privateKey = kf.generatePrivate(keySpec);
+            PrivateKey privateKey = keyFactory.generatePrivate(keySpec);
 
             Cipher cipher = Cipher.getInstance("RSA/ECB/NoPadding");
             cipher.init(Cipher.DECRYPT_MODE, privateKey);
-
             byte[] decryptedInfo = cipher.doFinal(encryptedInfo);
 
             String info = getInfo();
             MessageDigest mdHashFunction = MessageDigest.getInstance("MD2");
             byte[] digest = mdHashFunction.digest(info.getBytes());
+
             if (!Arrays.equals(removeLeadingZeros(decryptedInfo), digest)) {
                 JOptionPane.showMessageDialog(null, "Please check your licence!");
                 System.exit(-1);
@@ -438,12 +431,18 @@ public class PasswordUtils {
                 break;
             }
         }
-
         return Arrays.copyOfRange(arr, zeros, arr.length);
     }
 
     private static String getRegistryValueByKey(String registryKey) {
-        return Advapi32Util.registryGetStringValue(WinReg.HKEY_CURRENT_USER, "Software", registryKey);
+        String registryValue = "";
+        try {
+            registryValue = Advapi32Util.registryGetStringValue(WinReg.HKEY_CURRENT_USER, "Software", registryKey);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Пожалуйста, проверьте имя раздела!", "Ошибка!", JOptionPane.ERROR_MESSAGE);
+            System.exit(-1);
+        }
+        return registryValue;
     }
 
     private static String showInputDialog(String message) {
