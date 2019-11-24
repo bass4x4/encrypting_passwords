@@ -1,6 +1,6 @@
 package Backend;
 
-import UI.AdminOptionsWindow;
+import Interface.AdminOptionsWindow;
 
 import javax.swing.*;
 import java.awt.*;
