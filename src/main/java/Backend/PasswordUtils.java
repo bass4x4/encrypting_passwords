@@ -33,26 +33,31 @@ public class PasswordUtils {
     public static String FILE_TO_CYPHER_PATH = "";
 
     public static void setNewConfirmedPassphrase() {
-        String newPassphrase = showInputDialog("Выберите парольную фразу:");;
+        String newPassphrase = showInputDialog("Выберите парольную фразу:");
+        if (newPassphrase == null) {
+            return;
+        }
         while (!passphraseFitsRules(newPassphrase)) {
             newPassphrase = showInputDialog("Выберите парольную фразу:");
             if (newPassphrase == null) {
-                JOptionPane.showMessageDialog(null, "Парольная фраза не выбрана!");
+                return;
             }
         }
 
-        String confirmedPassphrase = showInputDialog("Подтвердите парольную фразу:");;
-        while (passphraseFitsRules(confirmedPassphrase)) {
+        String confirmedPassphrase = showInputDialog("Подтвердите парольную фразу:");
+        if (confirmedPassphrase == null) {
+            return;
+        }
+        while (!passphraseFitsRules(confirmedPassphrase)) {
             confirmedPassphrase = showInputDialog("Подтвердите парольную фразу:");
             if (confirmedPassphrase == null) {
-                JOptionPane.showMessageDialog(null, "Парольная фраза не выбрана!");
+                return;
             }
         }
-
         PASSPHRASE = confirmedPassphrase;
     }
 
-    private static boolean passphraseFitsRules(String passphrase) {
+    public static boolean passphraseFitsRules(String passphrase) {
         if (passphrase.length() > PassphraseWindow.maximumPassphraseLength || passphrase.length() < PassphraseWindow.minimumPassphraseLength) {
             JOptionPane.showMessageDialog(null, "Длина парольной фразы не удовлетворяет условиям!");
             return false;
@@ -104,6 +109,7 @@ public class PasswordUtils {
         if (okCxl == JOptionPane.OK_OPTION) {
             return new String(passwordField.getPassword());
         } else {
+            JOptionPane.showMessageDialog(null, "Парольная фраза не выбрана!");
             return null;
         }
     }
