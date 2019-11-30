@@ -18,7 +18,7 @@ public class PassphraseWindow {
     private JPanel passphrasePanel;
 
     public static int minimumPassphraseLength = 8;
-    public static int maximumPassphraseLength = 8;
+    public static int maximumPassphraseLength = 32;
     public static boolean specialSymbolsAllowed = false;
     public static boolean lowerCaseAllowed = false;
     public static boolean upperCaseAllowed = false;

@@ -23,16 +23,16 @@ public class PasswordUtils {
 
     public static final String ADMIN_NAME = "admin";
 
-    private static String pathString = System.getProperty("user.dir") + "\\PASSWORDS.txt";
+    public static final String PATH = System.getProperty("user.dir");
 
     private static final Set<Character> SPECIAL_SYMBOLS = Sets.newHashSet('!', '@', '#', '$', '%', '&', '*', '(', ')', '_', '+', '=', '/'
             , ',', '.', '?', ';', ':', '<', '>', '~', '`', '[', ']', '{', '}', '|');
 
-    public static String PASSPHRASE = "aaaaaaaa";
+    public static String PASSPHRASE = "";
 
     public static String FILE_TO_CYPHER_PATH = "";
 
-    public static String EXTRA_PASS_PART = "RC4Ankushev";
+    public static final String EXTRA_PASS_PART = "";//"RC4Ankushev";
 
     public static void setNewConfirmedPassphrase() {
         String newPassphrase = showInputDialog("Выберите парольную фразу:");

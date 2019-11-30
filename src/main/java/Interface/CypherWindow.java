@@ -9,8 +9,9 @@ import com.intellij.uiDesigner.core.Spacer;
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 
 public class CypherWindow extends JFrame {
     private JButton cypherTextButton;
@@ -70,10 +71,41 @@ public class CypherWindow extends JFrame {
                 String plainText = resultTextField.getText();
                 byte[] bytes = rc4.Encode(plainText.getBytes());
                 String result = new String(bytes);
-                if (!result.substring(result.length() - PasswordUtils.EXTRA_PASS_PART.length()).equals(PasswordUtils.EXTRA_PASS_PART)) {
-                    JOptionPane.showMessageDialog(null, "Введена неверная парольная фраза!");
-                } else {
-                    textToEditField.setText(result);
+                try {
+                    String extraPassPart = result.substring(result.length() - PasswordUtils.EXTRA_PASS_PART.length());
+                    if (!extraPassPart.equals(PasswordUtils.EXTRA_PASS_PART)) {
+                        JOptionPane.showMessageDialog(null, "Введена неверная парольная фраза!");
+                    } else {
+                        textToEditField.setText(result.substring(0, result.length() - PasswordUtils.EXTRA_PASS_PART.length()));
+                    }
+                } catch (StringIndexOutOfBoundsException e) {
+                    JOptionPane.showMessageDialog(null, "Проверьте иходный текст!");
+                }
+            }
+        });
+        saveToFileButton.addActionListener(actionEvent -> {
+            File file = new File(PasswordUtils.PATH + "\\EncodedText.txt");
+            try {
+                Files.write(file.toPath(), resultTextField.getText().getBytes());
+                JOptionPane.showMessageDialog(null, String.format("Зашифрованный текст успешно записан в файл: %s", PasswordUtils.PATH + "\\EncodedText.txt"));
+            } catch (IOException e) {
+            }
+        });
+        cypherFileButton.addActionListener(actionEvent -> {
+            File file = new File(PasswordUtils.FILE_TO_CYPHER_PATH);
+            if (!file.exists()) {
+                JOptionPane.showMessageDialog(null, String.format("Файла не существует: ", PasswordUtils.FILE_TO_CYPHER_PATH));
+            } else {
+                try {
+                    byte[] bytes = Files.readAllBytes(file.toPath());
+                    String plainText = new String(bytes) + PasswordUtils.EXTRA_PASS_PART;
+                    RC4 rc4 = new RC4(PasswordUtils.PASSPHRASE.getBytes(), eightBit.isSelected());
+                    byte[] encodedText = rc4.Encode(plainText.getBytes());
+                    File encodedFilePath = new File(PasswordUtils.PATH + "\\EncodedFile");
+                    Files.write(encodedFilePath.toPath(), encodedText);
+                    JOptionPane.showMessageDialog(null, String.format("Зашифрованный файл успешно записан в: %s", PasswordUtils.PATH + "\\EncodedFile"));
+                } catch (IOException e) {
+                    JOptionPane.showMessageDialog(null, "Ошибка чтения данных из файла!");
                 }
             }
         });
