@@ -17,34 +17,45 @@ public class PassphraseWindow {
     private JSpinner maxLengthSpinner;
     private JPanel passphrasePanel;
 
-    public static int minimumPassphraseLength = 1;
-    public static int maximumPassphraseLength = 1;
-    public static boolean specialSymbolsAllowed;
-    public static boolean lowerCaseAllowed;
-    public static boolean upperCaseAllowed;
-    public static boolean numbersAllowed;
+    public static double minimumPassphraseLength = 1;
+    public static double maximumPassphraseLength = 1;
+    public static boolean specialSymbolsAllowed = false;
+    public static boolean lowerCaseAllowed = false;
+    public static boolean upperCaseAllowed = false;
+    public static boolean numbersAllowed = false;
 
     public PassphraseWindow() {
-        minLengthSpinner.setModel(new SpinnerNumberModel(1, 1, 32, 1.0));
-        maxLengthSpinner.setModel(new SpinnerNumberModel(1, 1, 32, 1.0));
+        setComponentsValue();
+
         applyButton.addActionListener(actionEvent -> {
             try {
-                int minimumLength = (Integer) minLengthSpinner.getValue();
-                int maximumLength = (Integer) maxLengthSpinner.getValue();
+                String minimumLengthInt = minLengthSpinner.getValue() + "";
+                String maximumLengthInt = maxLengthSpinner.getValue() + "";
+                double minimumLength = Double.parseDouble(minimumLengthInt);
+                double maximumLength = Double.parseDouble(maximumLengthInt);
                 if (maximumLength < minimumLength) {
                     JOptionPane.showMessageDialog(null, "Максимальная длина ключа меньше минимальной!");
                 } else {
                     minimumPassphraseLength = minimumLength;
                     maximumPassphraseLength = maximumLength;
-                    specialSymbolsAllowed = specialSymbolsAllowedCheckBox.isEnabled();
-                    lowerCaseAllowed = lowercaseAllowedCheckBox.isEnabled();
-                    upperCaseAllowed = uppercaseAllowedCheckBox.isEnabled();
-                    numbersAllowed = numbersAllowedCheckBox.isEnabled();
+                    specialSymbolsAllowed = specialSymbolsAllowedCheckBox.isSelected();
+                    lowerCaseAllowed = lowercaseAllowedCheckBox.isSelected();
+                    upperCaseAllowed = uppercaseAllowedCheckBox.isSelected();
+                    numbersAllowed = numbersAllowedCheckBox.isSelected();
                 }
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(null, "Проверьте максимальную/минимальную длину ключа");
             }
         });
+    }
+
+    private void setComponentsValue() {
+        minLengthSpinner.setModel(new SpinnerNumberModel(minimumPassphraseLength, 1, 32, 1.0));
+        maxLengthSpinner.setModel(new SpinnerNumberModel(maximumPassphraseLength, 1, 32, 1.0));
+        specialSymbolsAllowedCheckBox.setSelected(specialSymbolsAllowed);
+        lowercaseAllowedCheckBox.setSelected(lowerCaseAllowed);
+        uppercaseAllowedCheckBox.setSelected(upperCaseAllowed);
+        numbersAllowedCheckBox.setSelected(numbersAllowed);
     }
 
     public JPanel getPassphrasePanel() {
