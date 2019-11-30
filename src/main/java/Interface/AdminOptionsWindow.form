@@ -18,7 +18,7 @@
           <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <text value="Настройки парольной фразы"/>
+          <text value="Настройки ключа"/>
         </properties>
       </component>
       <hspacer id="9f4a9">

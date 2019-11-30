@@ -17,8 +17,8 @@ public class PassphraseWindow {
     private JSpinner maxLengthSpinner;
     private JPanel passphrasePanel;
 
-    public static double minimumPassphraseLength = 1;
-    public static double maximumPassphraseLength = 1;
+    public static int minimumPassphraseLength = 8;
+    public static int maximumPassphraseLength = 8;
     public static boolean specialSymbolsAllowed = false;
     public static boolean lowerCaseAllowed = false;
     public static boolean upperCaseAllowed = false;
@@ -31,8 +31,8 @@ public class PassphraseWindow {
             try {
                 String minimumLengthInt = minLengthSpinner.getValue() + "";
                 String maximumLengthInt = maxLengthSpinner.getValue() + "";
-                double minimumLength = Double.parseDouble(minimumLengthInt);
-                double maximumLength = Double.parseDouble(maximumLengthInt);
+                int minimumLength = Integer.parseInt(minimumLengthInt);
+                int maximumLength = Integer.parseInt(maximumLengthInt);
                 if (maximumLength < minimumLength) {
                     JOptionPane.showMessageDialog(null, "Максимальная длина ключа меньше минимальной!");
                 } else {
@@ -50,8 +50,8 @@ public class PassphraseWindow {
     }
 
     private void setComponentsValue() {
-        minLengthSpinner.setModel(new SpinnerNumberModel(minimumPassphraseLength, 1, 32, 1.0));
-        maxLengthSpinner.setModel(new SpinnerNumberModel(maximumPassphraseLength, 1, 32, 1.0));
+        minLengthSpinner.setModel(new SpinnerNumberModel(minimumPassphraseLength, 8, 32, 1));
+        maxLengthSpinner.setModel(new SpinnerNumberModel(maximumPassphraseLength, 8, 32, 1));
         specialSymbolsAllowedCheckBox.setSelected(specialSymbolsAllowed);
         lowercaseAllowedCheckBox.setSelected(lowerCaseAllowed);
         uppercaseAllowedCheckBox.setSelected(upperCaseAllowed);

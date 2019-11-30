@@ -28,9 +28,11 @@ public class PasswordUtils {
     private static final Set<Character> SPECIAL_SYMBOLS = Sets.newHashSet('!', '@', '#', '$', '%', '&', '*', '(', ')', '_', '+', '=', '/'
             , ',', '.', '?', ';', ':', '<', '>', '~', '`', '[', ']', '{', '}', '|');
 
-    public static String PASSPHRASE = "";
+    public static String PASSPHRASE = "aaaaaaaa";
 
     public static String FILE_TO_CYPHER_PATH = "";
+
+    public static String EXTRA_PASS_PART = "RC4Ankushev";
 
     public static void setNewConfirmedPassphrase() {
         String newPassphrase = showInputDialog("Выберите парольную фразу:");
@@ -55,6 +57,10 @@ public class PasswordUtils {
             }
         }
         PASSPHRASE = confirmedPassphrase;
+    }
+
+    public static boolean passphraseFitsRules() {
+        return passphraseFitsRules(PASSPHRASE);
     }
 
     public static boolean passphraseFitsRules(String passphrase) {
@@ -102,7 +108,7 @@ public class PasswordUtils {
         return false;
     }
 
-    private static String showInputDialog(String message) {
+    public static String showInputDialog(String message) {
         JPasswordField passwordField = new JPasswordField();
         int okCxl = JOptionPane.showConfirmDialog(null, passwordField, message, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
