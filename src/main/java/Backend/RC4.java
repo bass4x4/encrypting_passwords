@@ -16,7 +16,6 @@ public class RC4 {
         for (int i = 0; i < S.length; i++) {
             S[i] = (byte) i;
         }
-
         int j = 0;
         for (int i = 0; i < S.length; i++) {
             j = (j + getIntFromByte(S[i]) + key[i % key.length]) % S.length;
@@ -25,10 +24,10 @@ public class RC4 {
     }
 
     private byte keyItem() {
-        x = (x + 1) % 256;
-        y = (y + getIntFromByte(S[x])) % 256;
+        x = (x + 1) % S.length;
+        y = (y + getIntFromByte(S[x])) % S.length;
         swap(S, x, y);
-        return S[(getIntFromByte(S[x]) + getIntFromByte(S[y])) % 256];
+        return S[(getIntFromByte(S[x]) + getIntFromByte(S[y])) % S.length];
     }
 
     public byte[] Encode(byte[] data) {

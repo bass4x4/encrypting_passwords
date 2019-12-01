@@ -12,6 +12,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Arrays;
 
 public class CypherWindow extends JFrame {
     private JButton cypherTextButton;
@@ -50,7 +51,7 @@ public class CypherWindow extends JFrame {
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 String path = fileChooser.getSelectedFile().getPath();
                 PasswordUtils.FILE_TO_CYPHER_PATH = path;
-                statusLabel.setText("Выбран файл:" + path);
+                JOptionPane.showMessageDialog(null, "Выбран файл:" + path);
             }
         });
         cypherTextButton.addActionListener(actionEvent -> {
@@ -94,21 +95,59 @@ public class CypherWindow extends JFrame {
         cypherFileButton.addActionListener(actionEvent -> {
             File file = new File(PasswordUtils.FILE_TO_CYPHER_PATH);
             if (!file.exists()) {
-                JOptionPane.showMessageDialog(null, String.format("Файла не существует: ", PasswordUtils.FILE_TO_CYPHER_PATH));
+                JOptionPane.showMessageDialog(null, String.format("Файл не существует: %s", PasswordUtils.FILE_TO_CYPHER_PATH));
+            } else {
+                if (PasswordUtils.passphraseFitsRules()) {
+                    try {
+                        byte[] bytes = Files.readAllBytes(file.toPath());
+                        byte[] plainText = concatByteArrays(bytes, PasswordUtils.EXTRA_PASS_PART.getBytes());
+                        RC4 rc4 = new RC4(PasswordUtils.PASSPHRASE.getBytes(), eightBit.isSelected());
+                        byte[] encodedText = rc4.Encode(plainText);
+                        String cypheredFilePath = PasswordUtils.PATH + "\\" + file.getName();
+                        File encodedFilePath = new File(cypheredFilePath);
+                        Files.write(encodedFilePath.toPath(), encodedText);
+                        JOptionPane.showMessageDialog(null, String.format("Зашифрованный файл успешно записан в: %s", cypheredFilePath));
+                    } catch (IOException e) {
+                        JOptionPane.showMessageDialog(null, "Ошибка чтения данных из файла!");
+                    }
+                }
+            }
+        });
+        decypherFileButton.addActionListener(actionEvent -> {
+            File file = new File(PasswordUtils.FILE_TO_CYPHER_PATH);
+            if (!file.exists()) {
+                JOptionPane.showMessageDialog(null, String.format("Файл не существует: %s", PasswordUtils.FILE_TO_CYPHER_PATH));
             } else {
                 try {
+                    String passphrase = PasswordUtils.showInputDialog("Введите парольную фразу:");
+                    if (passphrase == null) {
+                        return;
+                    }
                     byte[] bytes = Files.readAllBytes(file.toPath());
-                    String plainText = new String(bytes) + PasswordUtils.EXTRA_PASS_PART;
-                    RC4 rc4 = new RC4(PasswordUtils.PASSPHRASE.getBytes(), eightBit.isSelected());
-                    byte[] encodedText = rc4.Encode(plainText.getBytes());
-                    File encodedFilePath = new File(PasswordUtils.PATH + "\\EncodedFile");
-                    Files.write(encodedFilePath.toPath(), encodedText);
-                    JOptionPane.showMessageDialog(null, String.format("Зашифрованный файл успешно записан в: %s", PasswordUtils.PATH + "\\EncodedFile"));
+                    RC4 rc4 = new RC4(passphrase.getBytes(), eightBit.isSelected());
+                    byte[] result = rc4.Encode(bytes);
+                    String extraPassPart = new String(Arrays.copyOfRange(result, result.length - PasswordUtils.EXTRA_PASS_PART.length(), result.length));
+                    if (!extraPassPart.equals(PasswordUtils.EXTRA_PASS_PART)) {
+                        JOptionPane.showMessageDialog(null, "Введена неверная парольная фраза!");
+                    } else {
+                        byte[] resultFile = Arrays.copyOfRange(result, 0, result.length - PasswordUtils.EXTRA_PASS_PART.length());
+                        String decypheredFilePath = PasswordUtils.PATH + "\\" + file.getName();
+                        File decodedFilePath = new File(decypheredFilePath);
+                        Files.write(decodedFilePath.toPath(), resultFile);
+                        JOptionPane.showMessageDialog(null, String.format("Исходный файл успешно записан в: %s", decypheredFilePath));
+                    }
                 } catch (IOException e) {
                     JOptionPane.showMessageDialog(null, "Ошибка чтения данных из файла!");
                 }
             }
         });
+    }
+
+    private byte[] concatByteArrays(byte[] a, byte[] b) {
+        byte[] c = new byte[a.length + b.length];
+        System.arraycopy(a, 0, c, 0, a.length);
+        System.arraycopy(b, 0, c, a.length, b.length);
+        return c;
     }
 
     public JPanel getCypherPanel() {
@@ -186,7 +225,7 @@ public class CypherWindow extends JFrame {
         decypherFileButton.setText("Расшифровать файл");
         cypherPanel.add(decypherFileButton, new GridConstraints(8, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer4 = new Spacer();
-        cypherPanel.add(spacer4, new GridConstraints(9, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        cypherPanel.add(spacer4, new GridConstraints(9, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
     }
 
     /**

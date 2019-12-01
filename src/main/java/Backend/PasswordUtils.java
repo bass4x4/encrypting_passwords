@@ -28,7 +28,7 @@ public class PasswordUtils {
     private static final Set<Character> SPECIAL_SYMBOLS = Sets.newHashSet('!', '@', '#', '$', '%', '&', '*', '(', ')', '_', '+', '=', '/'
             , ',', '.', '?', ';', ':', '<', '>', '~', '`', '[', ']', '{', '}', '|');
 
-    public static String PASSPHRASE = "";
+    public static String PASSPHRASE = "aaaaaaaa";
 
     public static String FILE_TO_CYPHER_PATH = "";
 
