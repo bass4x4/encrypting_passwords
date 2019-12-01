@@ -159,7 +159,7 @@ public class CipherWindow extends JFrame {
         return c;
     }
 
-    public JPanel getCipherPanel() {
+    JPanel getCipherPanel() {
         return cipherPanel;
     }
 
