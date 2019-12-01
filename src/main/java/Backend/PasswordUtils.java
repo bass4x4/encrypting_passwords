@@ -28,11 +28,11 @@ public class PasswordUtils {
     private static final Set<Character> SPECIAL_SYMBOLS = Sets.newHashSet('!', '@', '#', '$', '%', '&', '*', '(', ')', '_', '+', '=', '/'
             , ',', '.', '?', ';', ':', '<', '>', '~', '`', '[', ']', '{', '}', '|');
 
-    public static String PASSPHRASE = "aaaaaaaa";
+    public static String PASSPHRASE = "";
 
-    public static String FILE_TO_CYPHER_PATH = "";
+    public static String FILE_TO_CIPHER_PATH = "";
 
-    public static final String EXTRA_PASS_PART = "";//"RC4Ankushev";
+    public static final String EXTRA_PASS_PART = "RC4Ankushev";
 
     public static void setNewConfirmedPassphrase() {
         String newPassphrase = showInputDialog("Выберите парольную фразу:");
@@ -64,6 +64,10 @@ public class PasswordUtils {
     }
 
     public static boolean passphraseFitsRules(String passphrase) {
+        if (passphrase.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Пожалуйста, задайте парольную фразу!");
+            return false;
+        }
         if (passphrase.length() > PassphraseWindow.maximumPassphraseLength || passphrase.length() < PassphraseWindow.minimumPassphraseLength) {
             JOptionPane.showMessageDialog(null, "Длина парольной фразы не удовлетворяет условиям!");
             return false;

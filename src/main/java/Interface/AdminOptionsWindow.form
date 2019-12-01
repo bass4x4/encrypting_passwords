@@ -18,7 +18,7 @@
           <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <text value="Настройки ключа"/>
+          <text value="Настройки парольной фразы"/>
         </properties>
       </component>
       <hspacer id="9f4a9">
@@ -36,7 +36,7 @@
           <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
         </constraints>
       </vspacer>
-      <component id="a1af4" class="javax.swing.JButton" binding="cypherButton">
+      <component id="a1af4" class="javax.swing.JButton" binding="cipherButton">
         <constraints>
           <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>

@@ -9,11 +9,11 @@ import java.awt.*;
 
 public class AdminOptionsWindow {
     private JPanel adminOptionsPanel;
-    private JButton cypherButton;
+    private JButton cipherButton;
     private JButton passphraseSettingsButton;
 
     public AdminOptionsWindow() {
-        cypherButton.addActionListener(actionEvent -> createPanelOfType(new CypherWindow().getCypherPanel(), 600, 350));
+        cipherButton.addActionListener(actionEvent -> createPanelOfType(new CipherWindow().getCipherPanel(), 700, 400));
         passphraseSettingsButton.addActionListener(actionEvent -> createPanelOfType(new PassphraseWindow().getPassphrasePanel(), 300, 300));
     }
 
@@ -51,7 +51,7 @@ public class AdminOptionsWindow {
         final Spacer spacer1 = new Spacer();
         adminOptionsPanel.add(spacer1, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         passphraseSettingsButton = new JButton();
-        passphraseSettingsButton.setText("Настройки ключа");
+        passphraseSettingsButton.setText("Настройки парольной фразы");
         adminOptionsPanel.add(passphraseSettingsButton, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer2 = new Spacer();
         adminOptionsPanel.add(spacer2, new GridConstraints(1, 2, 2, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
@@ -59,9 +59,9 @@ public class AdminOptionsWindow {
         adminOptionsPanel.add(spacer3, new GridConstraints(1, 0, 2, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final Spacer spacer4 = new Spacer();
         adminOptionsPanel.add(spacer4, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
-        cypherButton = new JButton();
-        cypherButton.setText("Шифрование");
-        adminOptionsPanel.add(cypherButton, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        cipherButton = new JButton();
+        cipherButton.setText("Шифрование");
+        adminOptionsPanel.add(cipherButton, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     }
 
     /**
