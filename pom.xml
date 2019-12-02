@@ -15,6 +15,12 @@
             <artifactId>guava</artifactId>
             <version>28.0-jre</version>
         </dependency>
+        <dependency>
+            <groupId>com.intellij</groupId>
+            <artifactId>forms_rt</artifactId>
+            <version>6.0.5</version>
+        </dependency>
+
     </dependencies>
 
     <groupId>ru.mpei</groupId>

@@ -5,6 +5,7 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 public class AdminOptionsWindow {
@@ -19,7 +20,7 @@ public class AdminOptionsWindow {
 
     private void createPanelOfType(JPanel adminOptionsPanel, int x, int y) {
         final JDialog optionWindow = new JDialog(new JFrame("Change password"), true);
-
+        adminOptionsPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
         optionWindow.setContentPane(adminOptionsPanel);
         optionWindow.pack();
         optionWindow.setSize(x, y);
