@@ -6,17 +6,8 @@ import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.crypto.*;
 import javax.swing.*;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Stream;
+import java.util.Set;
 
 public class PasswordUtils {
     private static final Logger logger = LoggerFactory.getLogger(PasswordUtils.class);
@@ -118,6 +109,18 @@ public class PasswordUtils {
 
         if (okCxl == JOptionPane.OK_OPTION) {
             return new String(passwordField.getPassword());
+        } else {
+            JOptionPane.showMessageDialog(null, "Парольная фраза не выбрана!");
+            return null;
+        }
+    }
+
+    public static String showInputNameDialog(String message, String name) {
+        JTextField passwordField = new JTextField(name);
+        int okCxl = JOptionPane.showConfirmDialog(null, passwordField, message, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+        if (okCxl == JOptionPane.OK_OPTION) {
+            return passwordField.getText();
         } else {
             JOptionPane.showMessageDialog(null, "Парольная фраза не выбрана!");
             return null;
