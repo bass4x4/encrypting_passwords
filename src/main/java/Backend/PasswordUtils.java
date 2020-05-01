@@ -11,8 +11,6 @@ public class PasswordUtils {
 
     public static final String PATH = System.getProperty("user.dir");
 
-    public static String FILE_TO_CIPHER_PATH = "";
-
     public static final String EXTRA_PASS_PART = "RC4Ankushev";
 
 
