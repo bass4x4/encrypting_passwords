@@ -39,7 +39,6 @@ public class CipherWindow extends JFrame {
 
         ButtonGroup buttonGroup = new ButtonGroup();
 
-//        setPassphraseButton.addActionListener(actionEvent -> PasswordUtils.setNewConfirmedPassphrase());
         chooseFileButton.addActionListener(actionEvent -> {
             JFileChooser fileChooser = new JFileChooser();
             int returnVal = fileChooser.showOpenDialog(null);
@@ -50,37 +49,8 @@ public class CipherWindow extends JFrame {
                 pathLabel.setText(path.length() > 30 ? "..." + path.substring(path.length() - 30) : path);
             }
         });
-        cipherTextButton.addActionListener(actionEvent -> {
-//            if (PasswordUtils.passphraseFitsRules()) {
-//                RC4 rc4 = new RC4(PasswordUtils.PASSPHRASE.getBytes(), eightBit.isSelected());
-//                byte[] plainTextBytes = textToEditField.getText().getBytes();
-//                byte[] bytes = rc4.Encode(Base64.getEncoder().encode(concatByteArrays(plainTextBytes, PasswordUtils.EXTRA_PASS_PART.getBytes())));
-//                resultTextField.setText(new String(bytes));
-//            }
-        });
-        decipherTextButton.addActionListener(actionEvent -> {
-            try {
-                String passphrase = PasswordUtils.showInputDialog("Введите парольную фразу:");
-                if (passphrase == null) {
-                    return;
-                }
-                /*RC4 rc4 = new RC4(passphrase.getBytes(), eightBit.isSelected());
-                String plainText = textToEditField.getText();
-                byte[] result = Base64.getDecoder().decode(rc4.Encode(plainText.getBytes()));
-                try {
-                    String extraPassPart = new String(Arrays.copyOfRange(result, result.length - PasswordUtils.EXTRA_PASS_PART.length(), result.length));
-                    if (!extraPassPart.equals(PasswordUtils.EXTRA_PASS_PART)) {
-                        JOptionPane.showMessageDialog(null, "Введена неверная парольная фраза!");
-                    } else {
-                        resultTextField.setText(new String(Arrays.copyOfRange(result, 0, result.length - PasswordUtils.EXTRA_PASS_PART.length())));
-                    }
-                } catch (StringIndexOutOfBoundsException e) {
-                    JOptionPane.showMessageDialog(null, "Проверьте иходный текст!");
-                }*/
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, "Введена неверная парольная фраза!");
-            }
-        });
+        cipherTextButton.addActionListener(actionEvent -> resultTextField.setText(PasswordUtils.cesarCipher(textToEditField.getText())));
+        decipherTextButton.addActionListener(actionEvent -> resultTextField.setText(PasswordUtils.cesarDecipher(textToEditField.getText())));
         cipherFileButton.addActionListener(actionEvent -> {
             File file = new File(PasswordUtils.FILE_TO_CIPHER_PATH);
             if (!file.exists()) {
