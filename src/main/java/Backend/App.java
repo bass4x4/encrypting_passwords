@@ -1,17 +1,19 @@
 package Backend;
 
-import Interface.AdminOptionsWindow;
+import Interface.CipherWindow;
 
 import javax.swing.*;
-import java.awt.*;
+import javax.swing.border.EmptyBorder;
 
 public class App {
     public static void main(String[] args) {
         JFrame cipherWindow = new JFrame("Auth window");
-        cipherWindow.setContentPane(new AdminOptionsWindow().getAdminOptionsPanel());
+        JPanel cipherPanel = new CipherWindow().getCipherPanel();
+        cipherPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        cipherWindow.setContentPane(cipherPanel);
         cipherWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         cipherWindow.pack();
-        cipherWindow.setSize(250, 150);
+        cipherWindow.setSize(700, 400);
         cipherWindow.setResizable(false);
         cipherWindow.setVisible(true);
     }

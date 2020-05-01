@@ -1,7 +1,6 @@
 package Interface;
 
 import Backend.PasswordUtils;
-import Backend.RC4;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
@@ -12,21 +11,15 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Base64;
 
 public class CipherWindow extends JFrame {
     private JButton cipherTextButton;
     private JButton chooseFileButton;
     private JButton decipherTextButton;
     private JPanel cipherPanel;
-    private JRadioButton eightBit;
-    private JRadioButton sixteenBit;
     private JButton saveToFileButton;
     private JCheckBox eraseFileAfterEncrypt;
-    private JButton setPassphraseButton;
     private JTextArea textToEditField;
     private JTextArea resultTextField;
     private JButton cipherFileButton;
@@ -45,11 +38,8 @@ public class CipherWindow extends JFrame {
         statusPanel.add(statusLabel);
 
         ButtonGroup buttonGroup = new ButtonGroup();
-        buttonGroup.add(sixteenBit);
-        buttonGroup.add(eightBit);
-        eightBit.setSelected(true);
 
-        setPassphraseButton.addActionListener(actionEvent -> PasswordUtils.setNewConfirmedPassphrase());
+//        setPassphraseButton.addActionListener(actionEvent -> PasswordUtils.setNewConfirmedPassphrase());
         chooseFileButton.addActionListener(actionEvent -> {
             JFileChooser fileChooser = new JFileChooser();
             int returnVal = fileChooser.showOpenDialog(null);
@@ -61,12 +51,12 @@ public class CipherWindow extends JFrame {
             }
         });
         cipherTextButton.addActionListener(actionEvent -> {
-            if (PasswordUtils.passphraseFitsRules()) {
-                RC4 rc4 = new RC4(PasswordUtils.PASSPHRASE.getBytes(), eightBit.isSelected());
-                byte[] plainTextBytes = textToEditField.getText().getBytes();
-                byte[] bytes = rc4.Encode(Base64.getEncoder().encode(concatByteArrays(plainTextBytes, PasswordUtils.EXTRA_PASS_PART.getBytes())));
-                resultTextField.setText(new String(bytes));
-            }
+//            if (PasswordUtils.passphraseFitsRules()) {
+//                RC4 rc4 = new RC4(PasswordUtils.PASSPHRASE.getBytes(), eightBit.isSelected());
+//                byte[] plainTextBytes = textToEditField.getText().getBytes();
+//                byte[] bytes = rc4.Encode(Base64.getEncoder().encode(concatByteArrays(plainTextBytes, PasswordUtils.EXTRA_PASS_PART.getBytes())));
+//                resultTextField.setText(new String(bytes));
+//            }
         });
         decipherTextButton.addActionListener(actionEvent -> {
             try {
@@ -74,7 +64,7 @@ public class CipherWindow extends JFrame {
                 if (passphrase == null) {
                     return;
                 }
-                RC4 rc4 = new RC4(passphrase.getBytes(), eightBit.isSelected());
+                /*RC4 rc4 = new RC4(passphrase.getBytes(), eightBit.isSelected());
                 String plainText = textToEditField.getText();
                 byte[] result = Base64.getDecoder().decode(rc4.Encode(plainText.getBytes()));
                 try {
@@ -86,7 +76,7 @@ public class CipherWindow extends JFrame {
                     }
                 } catch (StringIndexOutOfBoundsException e) {
                     JOptionPane.showMessageDialog(null, "Проверьте иходный текст!");
-                }
+                }*/
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(null, "Введена неверная парольная фраза!");
             }
@@ -96,7 +86,7 @@ public class CipherWindow extends JFrame {
             if (!file.exists()) {
                 JOptionPane.showMessageDialog(null, String.format("Файл не существует: %s", PasswordUtils.FILE_TO_CIPHER_PATH));
             } else {
-                if (PasswordUtils.passphraseFitsRules()) {
+                /*if (PasswordUtils.passphraseFitsRules()) {
                     try {
                         String folderPath = chooseFolder();
                         if (folderPath.isEmpty() || !Files.exists(Paths.get(folderPath))) {
@@ -124,7 +114,7 @@ public class CipherWindow extends JFrame {
                     } catch (IOException e) {
                         JOptionPane.showMessageDialog(null, "Ошибка чтения данных из файла!");
                     }
-                }
+                }*/
             }
         });
         decipherFileButton.addActionListener(actionEvent -> {
@@ -143,7 +133,7 @@ public class CipherWindow extends JFrame {
                                 return;
                             }
                             byte[] bytes = Files.readAllBytes(file.toPath());
-                            RC4 rc4 = new RC4(passphrase.getBytes(), eightBit.isSelected());
+                            /*RC4 rc4 = new RC4(passphrase.getBytes(), eightBit.isSelected());
                             byte[] result = Base64.getDecoder().decode(rc4.Encode(bytes));
                             String extraPassPart = new String(Arrays.copyOfRange(result, result.length - PasswordUtils.EXTRA_PASS_PART.length(), result.length));
                             if (!extraPassPart.equals(PasswordUtils.EXTRA_PASS_PART)) {
@@ -158,7 +148,7 @@ public class CipherWindow extends JFrame {
                                 } else {
                                     JOptionPane.showMessageDialog(null, "Вы не выбрали имя файла.");
                                 }
-                            }
+                            }*/
                         }
                     } catch (IOException e) {
                         JOptionPane.showMessageDialog(null, "Ошибка чтения данных из файла!");
@@ -188,7 +178,7 @@ public class CipherWindow extends JFrame {
         return "";
     }
 
-    JPanel getCipherPanel() {
+    public JPanel getCipherPanel() {
         return cipherPanel;
     }
 
@@ -208,65 +198,51 @@ public class CipherWindow extends JFrame {
      */
     private void $$$setupUI$$$() {
         cipherPanel = new JPanel();
-        cipherPanel.setLayout(new GridLayoutManager(14, 4, new Insets(0, 0, 0, 0), -1, -1));
+        cipherPanel.setLayout(new GridLayoutManager(12, 4, new Insets(0, 0, 0, 0), -1, -1));
         final JLabel label1 = new JLabel();
-        label1.setText("Размер S-Block-а:");
-        cipherPanel.add(label1, new GridConstraints(1, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final Spacer spacer1 = new Spacer();
-        cipherPanel.add(spacer1, new GridConstraints(5, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        label1.setText("Результат:");
+        cipherPanel.add(label1, new GridConstraints(1, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JLabel label2 = new JLabel();
-        label2.setText("Результат:");
-        cipherPanel.add(label2, new GridConstraints(1, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final JLabel label3 = new JLabel();
-        label3.setText("Ввести текст:");
-        cipherPanel.add(label3, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        label2.setText("Ввести текст:");
+        cipherPanel.add(label2, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         decipherTextButton = new JButton();
         decipherTextButton.setText("Расшифровать текст");
-        cipherPanel.add(decipherTextButton, new GridConstraints(11, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        cipherPanel.add(decipherTextButton, new GridConstraints(9, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         cipherTextButton = new JButton();
         cipherTextButton.setText("Зашифровать текст");
-        cipherPanel.add(cipherTextButton, new GridConstraints(10, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        cipherPanel.add(cipherTextButton, new GridConstraints(8, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         chooseFileButton = new JButton();
         chooseFileButton.setText("Выбрать файл");
-        cipherPanel.add(chooseFileButton, new GridConstraints(6, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        cipherPanel.add(chooseFileButton, new GridConstraints(4, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final Spacer spacer1 = new Spacer();
+        cipherPanel.add(spacer1, new GridConstraints(0, 0, 1, 4, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         final Spacer spacer2 = new Spacer();
-        cipherPanel.add(spacer2, new GridConstraints(0, 0, 1, 4, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
-        final Spacer spacer3 = new Spacer();
-        cipherPanel.add(spacer3, new GridConstraints(12, 0, 1, 4, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        cipherPanel.add(spacer2, new GridConstraints(10, 0, 1, 4, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         eraseFileAfterEncrypt = new JCheckBox();
         eraseFileAfterEncrypt.setText("Стереть файл после шифрования");
         cipherPanel.add(eraseFileAfterEncrypt, new GridConstraints(3, 1, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        setPassphraseButton = new JButton();
-        setPassphraseButton.setText("Задать парольную фразу");
-        cipherPanel.add(setPassphraseButton, new GridConstraints(4, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JScrollPane scrollPane1 = new JScrollPane();
-        cipherPanel.add(scrollPane1, new GridConstraints(2, 0, 10, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        cipherPanel.add(scrollPane1, new GridConstraints(2, 0, 8, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         textToEditField = new JTextArea();
         scrollPane1.setViewportView(textToEditField);
         final JScrollPane scrollPane2 = new JScrollPane();
-        cipherPanel.add(scrollPane2, new GridConstraints(2, 3, 10, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        cipherPanel.add(scrollPane2, new GridConstraints(2, 3, 8, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         resultTextField = new JTextArea();
         scrollPane2.setViewportView(resultTextField);
-        sixteenBit = new JRadioButton();
-        sixteenBit.setText("16 бит");
-        cipherPanel.add(sixteenBit, new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        eightBit = new JRadioButton();
-        eightBit.setText("8 бит");
-        cipherPanel.add(eightBit, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         cipherFileButton = new JButton();
         cipherFileButton.setText("Зашифровать выбранный файл");
-        cipherPanel.add(cipherFileButton, new GridConstraints(7, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        cipherPanel.add(cipherFileButton, new GridConstraints(5, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         decipherFileButton = new JButton();
         decipherFileButton.setText("Расшифровать выбранный файл");
-        cipherPanel.add(decipherFileButton, new GridConstraints(8, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final Spacer spacer4 = new Spacer();
-        cipherPanel.add(spacer4, new GridConstraints(9, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
-        final JLabel label4 = new JLabel();
-        label4.setText("Выбран файл:");
-        cipherPanel.add(label4, new GridConstraints(13, 0, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        cipherPanel.add(decipherFileButton, new GridConstraints(6, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final Spacer spacer3 = new Spacer();
+        cipherPanel.add(spacer3, new GridConstraints(7, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        final JLabel label3 = new JLabel();
+        label3.setText("Выбран файл:");
+        cipherPanel.add(label3, new GridConstraints(11, 0, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         pathLabel = new JLabel();
         pathLabel.setText("");
-        cipherPanel.add(pathLabel, new GridConstraints(13, 1, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        cipherPanel.add(pathLabel, new GridConstraints(11, 1, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     }
 
     /**
